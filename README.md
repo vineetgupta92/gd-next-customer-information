@@ -37,7 +37,7 @@ This is a backend project developed using Spring Boot. The application is design
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/vineetgupta92/gd-next-customer-information.git
 2. Run the application:
    ```bash
    mvn spring-boot:run
