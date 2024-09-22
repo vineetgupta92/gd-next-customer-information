@@ -75,6 +75,13 @@ public class UserService {
 
         validateFormData(formData, user);
 
+        setUserEntityFromFormData(formData, user);
+
+        userRepository.save(user);
+        return externalService.callExternalService(user);
+    }
+
+    private void setUserEntityFromFormData(Map<String, String> formData, User user) {
         Map<String, Consumer<String>> fieldUpdaters = new HashMap<>();
         fieldUpdaters.put(BIRTHDATE, value -> user.setBirthdate(LocalDate.parse(value, formatter)));
         fieldUpdaters.put(BIRTHPLACE, user::setBirthplace);
@@ -86,9 +93,6 @@ public class UserService {
                 fieldUpdaters.get(key).accept(value);
             }
         });
-
-        userRepository.save(user);
-        return externalService.callExternalService(user);
     }
 
     private static void validateFormData(Map<String, String> formData, User user) {
