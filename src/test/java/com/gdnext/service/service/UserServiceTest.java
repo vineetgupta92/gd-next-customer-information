@@ -116,7 +116,7 @@ public class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         Map<String, String> formData = new HashMap<>();
-        formData.put(UserService.BIRTHDATE, "1990-01-01"); // Missing birthplace
+        formData.put(UserService.BIRTHDATE, "1990-01-01");
 
         assertThatThrownBy(() -> userService.submitForm(1L, formData))
             .isInstanceOf(RuntimeException.class)

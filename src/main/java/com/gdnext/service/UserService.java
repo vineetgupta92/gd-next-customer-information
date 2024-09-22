@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service
 public class UserService {
@@ -25,6 +26,10 @@ public class UserService {
     public static final String SEX = "sex";
 
     public static final String ADDRESS = "address";
+
+    public static final String FIRST_NAME = "firstName";
+
+    public static final String LAST_NAME = "lastName";
 
     @Autowired
     private UserRepository userRepository;
@@ -68,17 +73,7 @@ public class UserService {
         var user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        var missingFields = new HashMap<String, Boolean>();
-        addMissingFieldsOnUser(missingFields, user);
-
-        for (Map.Entry<String, Boolean> entry : missingFields.entrySet()) {
-            String field = entry.getKey();
-            Boolean isMissing = entry.getValue();
-
-            if (isMissing && (!formData.containsKey(field) || formData.get(field) == null || formData.get(field).isBlank())) {
-                throw new RuntimeException("Missing required field in form data: " + field);
-            }
-        }
+        validateFormData(formData, user);
 
         Map<String, Consumer<String>> fieldUpdaters = new HashMap<>();
         fieldUpdaters.put(BIRTHDATE, value -> user.setBirthdate(LocalDate.parse(value, formatter)));
@@ -94,6 +89,23 @@ public class UserService {
 
         userRepository.save(user);
         return externalService.callExternalService(user);
+    }
+
+    private static void validateFormData(Map<String, String> formData, User user) {
+        Map<String, Supplier<Object>> requiredFields = Map.of(
+            BIRTHDATE, user::getBirthdate,
+            BIRTHPLACE, user::getBirthplace,
+            SEX, user::getSex,
+            ADDRESS, user::getAddress,
+            FIRST_NAME, user::getFirstName,
+            LAST_NAME, user::getLastName
+        );
+
+        for (Map.Entry<String, Supplier<Object>> entry : requiredFields.entrySet()) {
+            if (entry.getValue().get() == null && !formData.containsKey(entry.getKey())) {
+                throw new RuntimeException("Missing required field in form data: " + entry.getKey());
+            }
+        }
     }
 
 
